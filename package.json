@@ -2,13 +2,13 @@
   "name": "Commoners",
   "version": "1.0.0",
   "description": "Hypercore File-based Social Network",
-  "main": "src/app/main.js",
+  "main": "app/esm/esm.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
-  "repository": "https://github.com/nestarz/commoners-network",
+  "repository": "https://github.com/nestarz/commoners",
   "keywords": [],
   "author": "Elias Rhouzlane",
   "license": "CC0-1.0",
@@ -23,13 +23,14 @@
   "dependencies": {
     "crypto": "^1.0.1",
     "electron-squirrel-startup": "^1.0.0",
+    "esm": "^3.2.25",
     "hyperswarm": "^2.14.0",
     "servor": "^4.0.2"
   },
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "./icon.icns"
+        "icon": "./app/assets/icon.icns"
       },
       "makers": [
         {
