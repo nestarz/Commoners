@@ -1,3 +1,3 @@
 # Commoners
 
-Hypercore File-based Social Network
+Hyperswarm File-based Social Network
