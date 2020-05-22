@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
-const SwarmHTTP = require("./swarm-http.js");
+const SwarmHTTP = require("../swarm-http.js");
 
 const swarmHTTP = new SwarmHTTP();
 const { links, added, removed } = swarmHTTP.client();
