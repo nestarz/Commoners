@@ -1,8 +1,8 @@
 import net from "net";
 import caddyAdapter from "../server/index.js";
 
-export default (swarm) => async (root, port) => {
-  const instance = await caddyAdapter(root, port);
+export default (swarm) => async (binaries, root) => {
+  const instance = await caddyAdapter(binaries, root);
   console.log(`Local CaddyWebdav: http://localhost:${instance.port}`);
   swarm.on("connection", (socket) => {
     socket.on("data", (message) => {

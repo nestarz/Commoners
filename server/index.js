@@ -3,8 +3,6 @@ import net from "net";
 import http from "http";
 import path from "path";
 
-import { execPath } from "./binaries/binaries.js";
-
 const portAvailable = (port) =>
   new Promise((resolve) => {
     const options = { port, host: "localhost" };
@@ -44,8 +42,8 @@ const checkStarted = (chunk) => {
   } catch {}
 };
 
-const startCaddy = () => {
-  const caddy = safe(spawn(path.join(execPath, "caddy"), ["run"]));
+const startCaddy = (executable) => {
+  const caddy = safe(spawn(path.join(executable, "caddy"), ["run"]));
 
   return new Promise((resolve, reject) => {
     caddy.stderr.on("data", function startListener(chunk) {
@@ -79,10 +77,10 @@ const createConfig = (root, port) => ({
   },
 });
 
-export default (root) =>
+export default (executable, root) =>
   portAvailable(2019)
     .then(async (available) => {
-      if (available) await startCaddy();
+      if (available) await startCaddy(executable);
       else console.warn(":2019 in use, trying anyway...");
     })
     .then(() => portAvailable(undefined))

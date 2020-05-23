@@ -1,6 +1,20 @@
 import { ipcMain as ipc, dialog } from "electron";
 import createSwarmHTTP from "../../../src/index.js";
 
+import { app } from "electron";
+import { platform } from "os";
+import path from "path";
+
+const binaries = app.isPackaged
+  ? path.join(
+      path.dirname(app.getAppPath()),
+      "app",
+      "resources",
+      platform(),
+      "bin"
+    )
+  : path.join("resources", platform(), "bin");
+
 const swarmHTTP = createSwarmHTTP();
 const peers = swarmHTTP.client();
 
@@ -23,7 +37,7 @@ export default ({ webContents }) => {
     dialog
       .showOpenDialog({ properties: ["openDirectory"] })
       .then(({ filePaths: [filePath] }) => {
-        if (filePath) swarmHTTP.server(filePath).then(send.server);
+        if (filePath) swarmHTTP.server(binaries, filePath).then(send.server);
       })
   );
 };

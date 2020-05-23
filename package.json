@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Hypercore File-based Social Network",
   "main": "app/esm/esm.js",
+  "type": "module",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -22,21 +23,11 @@
   },
   "dependencies": {
     "crypto": "^1.0.1",
+    "electron-log": "^4.2.0",
     "electron-squirrel-startup": "^1.0.0",
     "esm": "^3.2.25",
     "hyperswarm": "^2.14.0",
     "servor": "^4.0.2"
-  },
-  "build": {
-    "extraFiles": [
-      {
-        "from": "resources/mac/bin",
-        "to": "Resources/bin",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ]
   },
   "config": {
     "forge": {
