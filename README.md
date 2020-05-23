@@ -4,7 +4,7 @@ Hyperswarm and [Kademlia DHT](https://en.wikipedia.org/wiki/Kademlia) File-based
 
 ## Structure
 
-Three parts divide the project:
+Four parts divide the project:
 
 ```
 ├── app
@@ -13,18 +13,18 @@ Three parts divide the project:
 ├── resources
 ```
 
-1. **App**
+### App
 
 Contains Electron source files to build an easy to distribute GUI.
 
-2. **Resources**
+### Resources
 
 Contains the Caddy binaries for each platform (currently only Darwin is supported).
 
-3. **Server**
+### Server
 
 Contains logic to start/end a Caddy server and serve folders using Webdav.
 
-4. **Source**
+### Source
 
 Contains the connection logic between peers HTTP server and client peers over the Hyperswarm Protocol.
