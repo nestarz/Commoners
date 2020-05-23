@@ -1,5 +1,7 @@
 import { EventEmitter } from "events";
 
+const peerLink = (host, port) => `http://${host}:${port}`;
+
 class Peers extends EventEmitter {
   constructor() {
     super();
@@ -7,6 +9,7 @@ class Peers extends EventEmitter {
   }
   add(peer) {
     this.set.add(peer);
+    console.log(peerLink(peer.host, peer.port));
     this.emit("connection", peer);
   }
   delete(peer) {

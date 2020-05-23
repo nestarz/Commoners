@@ -1,17 +1,16 @@
 import net from "net";
-import servor from "servor";
+import caddyAdapter from "../server/index.js";
 
-export default (swarm) => async (root) => {
-  const server = await servor({ root, static: true, reload: false });
-
+export default (swarm) => async (root, port) => {
+  const instance = await caddyAdapter(root, port);
   swarm.on("connection", (socket) => {
     socket.on("data", (message) => {
       const service = new net.Socket();
       service
-        .connect(server.port, "127.0.0.1", () => service.write(message))
+        .connect(instance.port, "127.0.0.1", () => service.write(message))
         .on("data", (data) => socket.write(data));
     });
   });
 
-  return server;
+  return { root };
 };
