@@ -1,7 +1,6 @@
 import { spawn } from "child_process";
 import net from "net";
 import http from "http";
-import path from "path";
 
 const checkPort = (port) =>
   new Promise((resolve, reject) => {
@@ -41,7 +40,7 @@ export default (root, port) =>
         new Promise((resolve, reject) => {
           const timeout = setTimeout(() => reject(), 15000);
           safe(spawn("./server/caddy", ["run"])).stderr.on("data", (chunk) => {
-            console.log(chunk.toString());
+            // console.log(chunk.toString());
             try {
               const started = chunk
                 .toString()
@@ -83,7 +82,7 @@ export default (root, port) =>
         },
       });
 
-      const req = http.request({
+      const options = {
         host: "localhost",
         port: 2019,
         path: "/load",
@@ -92,9 +91,16 @@ export default (root, port) =>
           "Content-Type": "application/json",
           "Content-Length": config.length,
         },
-      });
-      req.write(config);
-      req.end();
+      };
 
-      return { port };
+      return new Promise((resolve, reject) => {
+        const req = http.request(options, (res) =>
+          res.statusCode === 200
+            ? resolve({ port })
+            : reject(new Error(`Status Code: ${res.statusCode}`))
+        );
+        req.on("error", reject);
+        req.write(config);
+        req.end();
+      });
     });
