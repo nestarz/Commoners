@@ -7,7 +7,7 @@ const swarmHTTP = createSwarmHTTP();
 function cli(command, ...args) {
   const actions = {
     [undefined]: () => serve(),
-    server: () => swarmHTTP.server(args[0] || ".", 2015),
+    server: () => swarmHTTP.server(args[0] || "."),
     client: () => swarmHTTP.client(),
   };
 

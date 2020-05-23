@@ -27,6 +27,17 @@
     "hyperswarm": "^2.14.0",
     "servor": "^4.0.2"
   },
+  "build": {
+    "extraFiles": [
+      {
+        "from": "resources/mac/bin",
+        "to": "Resources/bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  },
   "config": {
     "forge": {
       "packagerConfig": {

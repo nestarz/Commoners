@@ -22,7 +22,8 @@ export default ({ webContents }) => {
   ipc.on("create", () =>
     dialog
       .showOpenDialog({ properties: ["openDirectory"] })
-      .then(({ filePaths: [filePath] }) => swarmHTTP.server(filePath))
-      .then(send.server)
+      .then(({ filePaths: [filePath] }) => {
+        if (filePath) swarmHTTP.server(filePath).then(send.server);
+      })
   );
 };

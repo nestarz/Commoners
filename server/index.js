@@ -1,19 +1,19 @@
 import { spawn } from "child_process";
 import net from "net";
 import http from "http";
+import path from "path";
 
-const checkPort = (port) =>
-  new Promise((resolve, reject) => {
-    const tester = net
-      .createServer()
-      .once("error", (err) => reject(err))
-      .once("listening", () =>
-        tester.once("close", () => resolve(port)).close()
-      )
-      .listen(port);
+import { execPath } from "./binaries/binaries.js";
+
+const portAvailable = (port) =>
+  new Promise((resolve) => {
+    const options = { port, host: "localhost" };
+    const s = net.createServer().unref();
+    s.on("error", () => resolve(false)).listen(options, () => {
+      const { port } = s.address();
+      s.close(() => resolve(port));
+    });
   });
-
-const random = (a, b) => a + (Math.floor(Math.random() * b) - a);
 
 const safe = (child) => {
   [
@@ -33,55 +33,62 @@ const safe = (child) => {
   return child;
 };
 
-export default (root, port) =>
-  checkPort(2019)
-    .then(
-      () =>
-        new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => reject(), 15000);
-          safe(spawn("./server/caddy", ["run"])).stderr.on("data", (chunk) => {
-            // console.log(chunk.toString());
-            try {
-              const started = chunk
-                .toString()
-                .split("\n")
-                .filter((v) => v)
-                .map(JSON.parse)
-                .some(({ msg }) => msg === "admin endpoint started");
-              if (started) {
-                clearTimeout(timeout);
-                resolve();
-              }
-            } catch {}
-          });
-        })
-    )
-    .catch(() => console.warn(":2019 not available, trying anyway..."))
-    .then(() => (port ? checkPort(port) : random(5001, 30000)))
-    .then((port) => {
-      const config = JSON.stringify({
-        apps: {
-          http: {
-            servers: {
-              srv0: {
-                listen: [`:${port}`],
-                routes: [
-                  {
-                    handle: [
-                      {
-                        handler: "webdav",
-                        root,
-                      },
-                    ],
-                    match: [{ path: ["/*"] }],
-                  },
-                ],
-              },
-            },
-          },
-        },
-      });
+const checkStarted = (chunk) => {
+  try {
+    return chunk
+      .toString()
+      .split("\n")
+      .filter((v) => v)
+      .map(JSON.parse)
+      .some(({ msg }) => msg === "admin endpoint started");
+  } catch {}
+};
 
+const startCaddy = () => {
+  const caddy = safe(spawn(path.join(execPath, "caddy"), ["run"]));
+
+  return new Promise((resolve, reject) => {
+    caddy.stderr.on("data", function startListener(chunk) {
+      const id = setTimeout(() => reject("Listen Caddy start timeout"), 10000);
+      if (checkStarted(chunk)) resolve(clearTimeout(id));
+      this.removeListener("data", startListener);
+    });
+  });
+};
+
+const createConfig = (root, port) => ({
+  apps: {
+    http: {
+      servers: {
+        srv0: {
+          listen: [`:${port}`],
+          routes: [
+            {
+              handle: [
+                {
+                  handler: "webdav",
+                  root,
+                },
+              ],
+              match: [{ path: ["/*"] }],
+            },
+          ],
+        },
+      },
+    },
+  },
+});
+
+export default (root) =>
+  portAvailable(2019)
+    .then(async (available) => {
+      if (available) await startCaddy();
+      else console.warn(":2019 in use, trying anyway...");
+    })
+    .then(() => portAvailable(undefined))
+    .then((port) => {
+      console.log(port);
+      const config = JSON.stringify(createConfig(root, port));
       const options = {
         host: "localhost",
         port: 2019,
@@ -92,15 +99,15 @@ export default (root, port) =>
           "Content-Length": config.length,
         },
       };
-
       return new Promise((resolve, reject) => {
         const req = http.request(options, (res) =>
           res.statusCode === 200
-            ? resolve({ port })
+            ? resolve(port)
             : reject(new Error(`Status Code: ${res.statusCode}`))
         );
         req.on("error", reject);
         req.write(config);
         req.end();
       });
-    });
+    })
+    .then((port) => ({ port }));
